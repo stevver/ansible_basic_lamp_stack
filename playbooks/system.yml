@@ -1,0 +1,55 @@
+- name: "System preperation"
+  hosts: lamp_servers
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Update apt cahce
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Upgrade packages (safe)
+      apt:
+        upgrade: safe
+
+    - name: Install base tools
+      apt:
+        name:
+          - curl
+          - git
+          - unzip
+          - ufw
+          - python3-pymysql
+        state: present
+
+    - name: Set timezone
+      timezone:
+        name: "{{ timezone_name }}"
+
+    - name: Allow UFW default outgoing
+      ufw:
+        default: allow
+        direction: outgoing
+
+    - name: Deny UFW default incoming
+      ufw:
+        default: deny
+        direction: incoming
+
+    - name: Open UFW ports
+      ufw:
+        rule: allow
+        port: "{{ item }}"
+      loop: "{{ ufw_allowed_ports }}"
+
+    - name: Ensure UFW enabled
+      ufw:
+        state: enabled
+        logging: "on"
+
+  post_tasks:
+    - name: Wait for SSH port (22) to remain open
+      wait_for:
+        port: 22
+        state: started
+        timeout: 5

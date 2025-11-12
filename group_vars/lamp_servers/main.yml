@@ -1,0 +1,3 @@
+---
+# Group-specific overrides for hosts in [lamp_servers].
+# Intentionally left empty. All variables are defined in group_vars/all/main.yml.

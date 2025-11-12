@@ -1,0 +1,33 @@
+student_username: "kasutaja"
+server_ip: "192.168.56.102"
+domain_name: "lamp.local"
+server_admin: "admin@lamp.local"
+document_root: "/var/www/{{ domain_name }}"
+
+mysql_host: "localhost"
+mysql_database: "appdb"
+mysql_user: "appuser"
+
+ansible_become: true
+
+php_packages:
+  - php
+  - libapache2-mod-php
+  - php-mysql
+  - php-curl
+  - php-gd
+  - php-mbstring
+  - php-xml
+  - php-zip
+
+apache_modules:
+  - rewrite
+  - ssl
+  - headers
+
+ufw_allowed_ports:
+  - "22"
+  - "80"
+  - "443"
+
+timezone_name: "Europe/Tallinn"

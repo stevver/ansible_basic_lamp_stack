@@ -1,0 +1,76 @@
+- name: "Apache setup"
+  hosts: lamp_servers
+  become: true
+  vars:
+    vhost_path: "/etc/apache2/sites-available/{{ domain_name }}.conf"
+  tasks:
+    - name: Install Apache
+      apt:
+        name: apache2
+        state: present
+        update_cache: yes
+
+    - name: Enable required Apache modules
+      command: "a2enmod {{ item }}"
+      args:
+        creates: "/etc/apache2/mods-enabled/{{ item }}.load"
+      loop: "{{ apache_modules }}"
+      notify: Restart Apache
+
+    - name: Create document root
+      file:
+        path: "{{ document_root }}"
+        state: directory
+        owner: "{{ student_username }}"
+        group: "{{ student_username }}"
+        mode: "0755"
+
+    - name: Create Apache vhost from template
+      template:
+        src: "{{ playbook_dir }}/../templates/vhost.conf.j2"
+        dest: "{{ vhost_path }}"
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Reload Apache
+
+    - name: Disable default site if present
+      file:
+        path: /etc/apache2/sites-enabled/000-default.conf
+        state: absent
+      notify: Reload Apache
+
+    - name: Enable our site
+      command: "a2ensite {{ domain_name }}"
+      args:
+        creates: "/etc/apache2/sites-enabled/{{ domain_name }}.conf"
+      notify: Reload Apache
+
+    - name: Ensure Apache is running and enabled
+      service:
+        name: apache2
+        state: started
+        enabled: true
+
+  handlers:
+    - name: Reload Apache
+      service:
+        name: apache2
+        state: reloaded
+
+    - name: Restart Apache
+      service:
+        name: apache2
+        state: restarted
+
+  post_tasks:
+    - name: Wait for Apache port 80
+      wait_for:
+        port: 80
+        state: started
+        timeout: 30
+
+    - name: Test Apache is responding (200 or 403 before index exists)
+      uri:
+        url: "http://{{ ansible_host | default(inventory_hostname) }}"
+        status_code: [200, 403]

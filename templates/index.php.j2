@@ -1,0 +1,18 @@
+<?php
+echo "<h1>LAMP Stack Test</h1>";
+echo "<p>Server (hostname): {{ ansible_hostname }}</p>";
+echo "<p>Domain: {{ domain_name }}</p>";
+echo "<p>PHP Version: " . phpversion() . "</p>";
+
+$host = "{{ mysql_host }}";
+$user = "{{ mysql_user }}";
+$pass = "{{ mysql_app_password | default('') }}";
+$db   = "{{ mysql_database }}";
+
+try {
+    $conn = new PDO("mysql:host=$host;dbname=$db", $user, $pass);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    echo "<p style='color:green'>MySQL connection: OK</p>";
+} catch(PDOException $e) {
+    echo "<p style='color:red'>MySQL connection: FAILED</p>";
+}
