@@ -112,7 +112,7 @@ Ava brauseris:
 Lehel kuvatakse **“LAMP Stack Test”** ja **“MySQL connection: OK”**.
 
 ### 3) Ekraanipilt
-Tõendus asub eraldi failina juur kaustas 'Screenshot 2025-11-12 161734.png'
+Tõendus asub eraldi failina juur kaustas `Screenshot 2025-11-12 161734.png`
 
 ---
 
